@@ -5,13 +5,7 @@ body {
   padding: 0;
 }
 
-/* Login */
 .login-container {
-  text-align: center;
-  margin-top: 100px;
-}
-
-.login-box {
   display: flex;
   flex-direction: column;
   gap: 10px;
@@ -19,17 +13,19 @@ body {
   padding: 20px;
   border-radius: 10px;
   width: 300px;
-  margin: auto;
+  margin: 100px auto;
   box-shadow: 0 0 10px rgba(0,0,0,0.1);
 }
 
-.login-box input {
+.login-container input,
+.input-box input {
   padding: 10px;
   border: 1px solid #ccc;
   border-radius: 5px;
 }
 
-.login-box button {
+.login-container button,
+.input-box button {
   padding: 10px;
   border: none;
   background: #0078ff;
@@ -38,15 +34,14 @@ body {
   cursor: pointer;
 }
 
-/* Chat */
 .chat-container {
   width: 500px;
   height: 600px;
   background: white;
   border-radius: 10px;
+  margin: 40px auto;
   display: flex;
   flex-direction: column;
-  margin: 40px auto;
   box-shadow: 0 0 15px rgba(0,0,0,0.1);
 }
 
@@ -68,31 +63,5 @@ body {
   margin-bottom: 10px;
   padding: 8px;
   border-radius: 8px;
-  max-width: 80%;
-}
-
-.message.me {
-  background: #d1e7dd;
-  margin-left: auto;
-  text-align: right;
-}
-
-.input-box {
-  display: flex;
-  border-top: 1px solid #ddd;
-}
-
-.input-box input {
-  flex: 1;
-  padding: 10px;
-  border: none;
-  outline: none;
-}
-
-.input-box button {
-  padding: 10px 20px;
-  border: none;
-  background: #0078ff;
-  color: white;
-  cursor: pointer;
+  background: #e2e3e5;
 }

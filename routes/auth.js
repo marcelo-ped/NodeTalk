@@ -1,36 +1,65 @@
-const express = require("express");
-const bcrypt = require("bcrypt");
-const jwt = require("jsonwebtoken");
-const { User } = require("../models");
+import express from "express";
+import bcrypt from "bcrypt";
 
-const router = express.Router();
-const SECRET = "meusegredo";
+export default function (pool) {
+  const router = express.Router();
 
-// Registro
-router.post("/register", async (req, res) => {
-  const { username, email, password } = req.body;
+  // Tela de login
+  router.get("/login", (req, res) => {
+    res.render("login", { title: "Login | Chat App" });
+  });
 
-  const hashed = await bcrypt.hash(password, 10);
-  try {
-    const user = await User.create({ username, email, password: hashed });
-    res.json({ message: "Usuário registrado com sucesso", user });
-  } catch (err) {
-    res.status(400).json({ error: "Erro ao registrar usuário", details: err });
-  }
-});
+  // POST login
+  router.post("/login", async (req, res) => {
+    const { email, password } = req.body;
+    try {
+      const result = await pool.query("SELECT * FROM users WHERE email = $1", [email]);
+      if (result.rows.length === 0) {
+        return res.render("login", { title: "Login", error: "Usuário não encontrado" });
+      }
 
-// Login
-router.post("/login", async (req, res) => {
-  const { email, password } = req.body;
+      const user = result.rows[0];
+      const match = await bcrypt.compare(password, user.password);
 
-  const user = await User.findOne({ where: { email } });
-  if (!user) return res.status(400).json({ error: "Usuário não encontrado" });
+      if (!match) {
+        return res.render("login", { title: "Login", error: "Senha incorreta" });
+      }
 
-  const isMatch = await bcrypt.compare(password, user.password);
-  if (!isMatch) return res.status(400).json({ error: "Senha incorreta" });
+      res.redirect("/chat");
+    } catch (err) {
+      console.error("Erro no login:", err);
+      res.render("login", { title: "Login", error: "Erro no servidor" });
+    }
+  });
 
-  const token = jwt.sign({ id: user.id }, SECRET, { expiresIn: "1h" });
-  res.json({ token, username: user.username });
-});
+  // Tela de registro
+  router.get("/register", (req, res) => {
+    res.render("register", { title: "Registrar | Chat App" });
+  });
 
-module.exports = router;
+  // POST registro
+  router.post("/register", async (req, res) => {
+    const { username, email, password } = req.body;
+
+    try {
+      const checkUser = await pool.query("SELECT * FROM users WHERE email = $1", [email]);
+      if (checkUser.rows.length > 0) {
+        return res.render("register", { title: "Registrar", error: "E-mail já registrado" });
+      }
+
+      const hashedPassword = await bcrypt.hash(password, 10);
+
+      await pool.query(
+        "INSERT INTO users (username, email, password) VALUES ($1, $2, $3)",
+        [username, email, hashedPassword]
+      );
+
+      res.redirect("/login");
+    } catch (err) {
+      console.error("Erro no registro:", err);
+      res.render("register", { title: "Registrar", error: "Erro no servidor" });
+    }
+  });
+
+  return router;
+}
